@@ -104,7 +104,7 @@ esac
 
 # Exit if base branch not found
 if ! check_branch remotes/$repo/$base >/dev/null 2>&1; then
-    echo "Base branch $base not found in the repo"
+    echo "Base branch $base not found in the repo (try 'git fetch $repo $base'?)"
     exit 1
 fi
 
