@@ -94,6 +94,14 @@ if [[ -z $repo ]]; then
     repo=$(git config --get-regexp '^remote.*' | sed '1s/remote\.\([^.]\+\)\..*/\1/p;d')
 fi
 
+echo "Development branch: '$dev', base branch: '$base', repository: '$repo'"
+read -p "Carry on? [Y/n]: " answer
+case $answer in
+    [nN]*)
+        exit 1
+        ;;
+esac
+
 # Exit if base branch not found
 if ! check_branch remotes/$repo/$base >/dev/null 2>&1; then
     echo "Base branch $base not found in the repo"
