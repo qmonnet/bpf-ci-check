@@ -133,27 +133,35 @@ fi
 
 trap switch_back EXIT
 
+# Retrieve title (subject of last commit) for development branch
 git switch -q $dev
 title=$(git show -s --pretty=format:%s)
+
+# Create CI branch
 git switch -q -c $ci
 
 root="$(git rev-parse --show-toplevel)"
 
+# Download and unzip CI files
 curl -sL "${VMTEST_PATH}master.zip" -o "${root}/master.zip"
 unzip -q "${root}/master.zip" -d "${root}"
 rm "${root}/master.zip"
 
+# Extract and commit CI files
 rsync -a --exclude README "${root}/vmtest-master/." "$root"
 rm -r "${root}/vmtest-master"
 
 git add -f "${root}/.github" "${root}/travis-ci"
 git commit -q -m "add CI files"
+
+# Push CI branch to GitHub
 if [[ $dryrun -eq 1 ]]; then
     echo "[dry-run] git push -q -f $repo -u HEAD"
 else
     git push -q -f $repo -u HEAD
 fi
 
+# Search for existing PR, create one if none found
 pr=$(gh pr list --json baseRefName,headRefName,url --jq ".[] | select(.headRefName == \"${ci}\" and .baseRefName == \"${base}\").url")
 if [[ -z $pr ]]; then
     if [[ $dryrun -eq 1 ]]; then
