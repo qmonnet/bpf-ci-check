@@ -116,14 +116,16 @@ git switch -q $dev
 title=$(git show -s --pretty=format:%s)
 git switch -q -c $ci
 
-curl -sLO ${VMTEST_PATH}master.zip
-unzip -q master.zip
-rm master.zip
+root="$(git rev-parse --show-toplevel)"
 
-rsync -a --exclude README vmtest-master/. .
-rm -r vmtest-master
+curl -sL "${VMTEST_PATH}master.zip" -o "${root}/master.zip"
+unzip -q "${root}/master.zip" -d "${root}"
+rm "${root}/master.zip"
 
-git add -f .github travis-ci
+rsync -a --exclude README "${root}/vmtest-master/." "$root"
+rm -r "${root}/vmtest-master"
+
+git add -f "${root}/.github" "${root}/travis-ci"
 git commit -q -m "add CI files"
 git push -q -f $repo -u HEAD
 git switch -q $current
