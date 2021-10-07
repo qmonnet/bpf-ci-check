@@ -32,6 +32,7 @@ Usage: ./bpf-ci-check [options]
 Test in CI - Open a GitHub PR for 'ci-test/<branch>' against <base> on <repo>
 Options:
         -h              display this help
+        -n              dry run (create branch, but do not push or create a PR)
         -d branch       development branch to test in CI (default: current)
         -b base         base branch to use (default: 'bpf-next')
         -r repo         GitHub repository to use, for both branches and for PR

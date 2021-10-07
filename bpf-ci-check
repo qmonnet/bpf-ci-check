@@ -10,6 +10,7 @@ usage() {
     echo "Test in CI - Open a GitHub PR for 'ci-test/<branch>' against <base> on <repo>"
     echo "Options:"
     echo "	-h		display this help"
+    echo "	-n		dry run (create branch, but do not push or create a PR)"
     echo "	-d branch	development branch to test in CI (default: current)"
     echo "	-b base		base branch to use (default: '$DEFAULT_BASE')"
     echo "	-r repo		GitHub repository to use, for both branches and for PR"
@@ -35,12 +36,17 @@ check_tool() {
 
 check_tool curl gh git rsync unzip
 
+dryrun=0
+
 OPTIND=1
-while getopts "hd:b:r:" opt; do
+while getopts "hnd:b:r:" opt; do
     case "$opt" in
     h)
         usage
         exit 0
+        ;;
+    n)
+        dryrun=1
         ;;
     d)
         dev=$OPTARG
@@ -142,11 +148,19 @@ rm -r "${root}/vmtest-master"
 
 git add -f "${root}/.github" "${root}/travis-ci"
 git commit -q -m "add CI files"
-git push -q -f $repo -u HEAD
+if [[ $dryrun -eq 1 ]]; then
+    echo "[dry-run] git push -q -f $repo -u HEAD"
+else
+    git push -q -f $repo -u HEAD
+fi
 
 pr=$(gh pr list --json baseRefName,headRefName,url --jq ".[] | select(.headRefName == \"${ci}\" and .baseRefName == \"${base}\").url")
 if [[ -z $pr ]]; then
-    gh pr create --base $base --head $ci --title "[CI run] $title" --body ""
+    if [[ $dryrun -eq 1 ]]; then
+        echo "[dry-run] gh pr create --base $base --head $ci --title \"[CI run] $title\" --body \"\""
+    else
+        gh pr create --base $base --head $ci --title "[CI run] $title" --body ""
+    fi
 else
     echo "Reusing existing PR: $pr"
 fi
