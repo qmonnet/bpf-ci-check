@@ -9,6 +9,7 @@ usage() {
     echo "Usage: $0 [options]"
     echo "Test in CI - Open a GitHub PR for 'ci-test/<branch>' against <base> on <repo>"
     echo "Options:"
+    echo "	-h		display this help"
     echo "	-d branch	development branch to test in CI (default: current)"
     echo "	-b base		base branch to use (default: '$DEFAULT_BASE')"
     echo "	-r repo		GitHub repository to use, for both branches and for PR"
