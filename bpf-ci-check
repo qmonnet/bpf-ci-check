@@ -115,10 +115,6 @@ rm master.zip
 rsync -a --exclude README vmtest-master/. .
 rm -r vmtest-master
 
-# Make check fail in workflow's description to avoid pulling other Linux
-# sources and overwriting our code
-sed -i "s|!= 'kernel-patches/bpf'|== ''|" .github/workflows/test.yml
-
 git add -f .github travis-ci
 git commit -q -m "add CI files"
 git push -q -f $repo -u HEAD
