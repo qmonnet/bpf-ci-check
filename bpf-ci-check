@@ -134,5 +134,5 @@ pr=$(gh pr list --json baseRefName,headRefName,url --jq ".[] | select(.headRefNa
 if [[ -z $pr ]]; then
     gh pr create --base $base --head $ci --title "[CI run] $title" --body ""
 else
-    echo "PR exists: $pr"
+    echo "Reusing existing PR: $pr"
 fi
