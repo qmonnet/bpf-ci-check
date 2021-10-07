@@ -101,7 +101,15 @@ fi
 
 # Delete previous CI branch if already existing
 if check_branch $ci >/dev/null 2>&1; then
-    git branch -q -D $ci
+    read -p "Found branch $ci. Delete it and create a new one? [Y/n]: " answer
+    case $answer in
+        [nN]*)
+            exit 1
+            ;;
+        *)
+            git branch -q -D $ci
+            ;;
+    esac
 fi
 
 git switch -q $dev
