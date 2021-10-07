@@ -16,6 +16,10 @@ usage() {
     echo "			(default: gh-resolved base or first remote found)"
 }
 
+switch_back() {
+    git switch -q $current
+}
+
 check_branch() {
     git rev-parse --abbrev-ref $1
 }
@@ -121,6 +125,8 @@ if check_branch $ci >/dev/null 2>&1; then
     esac
 fi
 
+trap switch_back EXIT
+
 git switch -q $dev
 title=$(git show -s --pretty=format:%s)
 git switch -q -c $ci
@@ -137,7 +143,6 @@ rm -r "${root}/vmtest-master"
 git add -f "${root}/.github" "${root}/travis-ci"
 git commit -q -m "add CI files"
 git push -q -f $repo -u HEAD
-git switch -q $current
 
 pr=$(gh pr list --json baseRefName,headRefName,url --jq ".[] | select(.headRefName == \"${ci}\" and .baseRefName == \"${base}\").url")
 if [[ -z $pr ]]; then
