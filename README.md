@@ -10,9 +10,9 @@ sending your patches just yet to the mailing list? This script is here to help.
 1. The script creates a new branch `ci-test/<branch>` based on your development
    branch to test.
 2. It pulls the files for the BPF CI from
-   https://github.com/kernel-patches/vmtest and add them to your repository,
+   https://github.com/kernel-patches/vmtest and adds them to your repository,
    and commits the change on that new branch.
-3. It pushes the branch and create a new pull request from this branch against
+3. It pushes the branch and creates a new pull request from this branch against
    a base branch, on a given repository.
 4. The GitHub Action starts, builds the kernel, and runs the BPF selftests.
 
