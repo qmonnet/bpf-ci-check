@@ -26,6 +26,12 @@ sending your patches just yet to the mailing list? This script is here to help.
 
 ## Usage
 
+Make sure your base branch is up-to-date (if you intend to create the PR
+against `bpf-next` from your own repository, make sure you have updated your
+`bpf-next` branch on your Linux fork on GitHub).
+
+Then just run the script:
+
 ```
 $ ./bpf-ci-check -h
 Usage: ./bpf-ci-check [options]
