@@ -6,28 +6,28 @@ DEFAULT_BASE="bpf-next"
 VMTEST_PATH="https://github.com/kernel-patches/vmtest/archive/refs/heads/"
 
 usage() {
-    echo "Usage: $0 [options]"
+    echo "Usage: ${0} [options]"
     echo "Test in CI - Open a GitHub PR for 'ci-test/<branch>' against <base> on <repo>"
     echo "Options:"
     echo "	-h		display this help"
     echo "	-n		dry run (create branch, but do not push or create a PR)"
     echo "	-d branch	development branch to test in CI (default: current)"
-    echo "	-b base		base branch to use (default: '$DEFAULT_BASE')"
+    echo "	-b base		base branch to use (default: '${DEFAULT_BASE}')"
     echo "	-r repo		GitHub repository to use, for both branches and for PR"
     echo "			(default: gh-resolved base or first remote found)"
 }
 
 switch_back() {
-    git switch -q $current
+    git switch -q "$current"
 }
 
 check_branch() {
-    git rev-parse --abbrev-ref $1
+    git rev-parse --abbrev-ref "$1"
 }
 
 check_tool() {
-    for i in $*; do
-        if ! type -p $i >/dev/null; then
+    for i in "$@"; do
+        if ! type -p "$i" >/dev/null; then
             echo "$i not found" >&2
             exit 1
         fi
@@ -49,13 +49,13 @@ while getopts "hnd:b:r:" opt; do
         dryrun=1
         ;;
     d)
-        dev=$OPTARG
+        dev="$OPTARG"
         ;;
     b)
-        base=$OPTARG
+        base="$OPTARG"
         ;;
     r)
-        repo=$OPTARG
+        repo="$OPTARG"
         ;;
     *)
         usage
@@ -66,67 +66,67 @@ done
 shift $((OPTIND-1))
 
 # Exit if we get additional arguments
-if [[ $# -gt 0 ]]; then
+if [[ "$#" -gt 0 ]]; then
     usage
     exit 1
 fi
 
 # Exit if repository is not clean
-status=$(git status --porcelain --untracked-files=no | tail -n1)
-if [[ -n $status ]]; then
+status="$(git status --porcelain --untracked-files=no | tail -n1)"
+if [[ -n "$status" ]]; then
     echo "Repository is not clean. Please stash your changes."
     exit 1
 fi
 
 # Development branch
-current=$(check_branch HEAD)
-if [[ -z $dev ]]; then
-    dev=$current
+current="$(check_branch HEAD)"
+if [[ -z "$dev" ]]; then
+    dev="$current"
 fi
-ci="ci-test/$dev"
+ci="ci-test/${dev}"
 
 # Exit if $dev does not exist
-if ! check_branch $dev >/dev/null 2>&1; then
+if ! check_branch "$dev" >/dev/null 2>&1; then
     usage
     exit 1
 fi
 
 # Base branch
-if [[ -z $base ]]; then
+if [[ -z "$base" ]]; then
     base="$DEFAULT_BASE"
 fi
 
 # Repository
-if [[ -z $repo ]]; then
-    repo=$(git config --get-regexp '^remote.*.gh-resolved base' | sed '1s/remote\.\([^.]\+\)\..*/\1/p;d')
+if [[ -z "$repo" ]]; then
+    repo="$(git config --get-regexp '^remote.*.gh-resolved base' | sed '1s/remote\.\([^.]\+\)\..*/\1/p;d')"
 fi
-if [[ -z $repo ]]; then
-    repo=$(git config --get-regexp '^remote.*' | sed '1s/remote\.\([^.]\+\)\..*/\1/p;d')
+if [[ -z "$repo" ]]; then
+    repo="$(git config --get-regexp '^remote.*' | sed '1s/remote\.\([^.]\+\)\..*/\1/p;d')"
 fi
 
-echo "Development branch: '$dev', base branch: '$base', repository: '$repo'"
-read -p "Carry on? [Y/n]: " answer
-case $answer in
+echo "Development branch: '${dev}', base branch: '${base}', repository: '${repo}'"
+read -rp "Carry on? [Y/n]: " answer
+case "$answer" in
     [nN]*)
         exit 1
         ;;
 esac
 
 # Exit if base branch not found
-if ! check_branch remotes/$repo/$base >/dev/null 2>&1; then
-    echo "Base branch $base not found in the repo (try 'git fetch $repo $base'?)"
+if ! check_branch "remotes/${repo}/${base}" >/dev/null 2>&1; then
+    echo "Base branch ${base} not found in the repo (try 'git fetch ${repo} ${base}'?)"
     exit 1
 fi
 
 # Delete previous CI branch if already existing
-if check_branch $ci >/dev/null 2>&1; then
-    read -p "Found branch $ci. Delete it and create a new one? [Y/n]: " answer
-    case $answer in
+if check_branch "$ci" >/dev/null 2>&1; then
+    read -rp "Found branch ${ci}. Delete it and create a new one? [Y/n]: " answer
+    case "$answer" in
         [nN]*)
             exit 1
             ;;
         *)
-            git branch -q -D $ci
+            git branch -q -D "$ci"
             ;;
     esac
 fi
@@ -134,11 +134,11 @@ fi
 trap switch_back EXIT
 
 # Retrieve title (subject of last commit) for development branch
-git switch -q $dev
-title=$(git show -s --pretty=format:%s)
+git switch -q "$dev"
+title="$(git show -s --pretty=format:%s)"
 
 # Create CI branch
-git switch -q -c $ci
+git switch -q -c "$ci"
 
 root="$(git rev-parse --show-toplevel)"
 
@@ -158,17 +158,17 @@ git commit -q -m "add CI files"
 if [[ $dryrun -eq 1 ]]; then
     echo "[dry-run] git push -q -f $repo -u HEAD"
 else
-    git push -q -f $repo -u HEAD
+    git push -q -f "$repo" -u HEAD
 fi
 
 # Search for existing PR, create one if none found
 pr=$(gh pr list --json baseRefName,headRefName,url --jq ".[] | select(.headRefName == \"${ci}\" and .baseRefName == \"${base}\").url")
 if [[ -z $pr ]]; then
     if [[ $dryrun -eq 1 ]]; then
-        echo "[dry-run] gh pr create --base $base --head $ci --title \"[CI run] $title\" --body \"\""
+        echo "[dry-run] gh pr create --base ${base} --head ${ci} --title \"[CI run] ${title}\" --body \"\""
     else
-        gh pr create --base $base --head $ci --title "[CI run] $title" --body ""
+        gh pr create --base "$base" --head "$ci" --title "[CI run] ${title}" --body ""
     fi
 else
-    echo "Reusing existing PR: $pr"
+    echo "Reusing existing PR: ${pr}"
 fi
