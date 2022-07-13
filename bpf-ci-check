@@ -154,6 +154,10 @@ rm -r "${root}/vmtest-master"
 git add -f "${root}/.github" "${root}/travis-ci"
 git commit -q -m "add CI files"
 
+sed -i "s/github.repository != 'kernel-patches\/bpf' && github.repository != 'kernel-patches\/bpf-rc'/false/g" "${root}/.github/workflows/test.yml"
+git add -f "${root}/.github"
+git commit -q -m "avoid overwriting bpf sources with bpf-next sources"
+
 # Push CI branch to GitHub
 if [[ $dryrun -eq 1 ]]; then
     echo "[dry-run] git push -q -f $repo -u HEAD"
