@@ -154,6 +154,11 @@ rm -r "${root}/vmtest-master"
 git add -f "${root}/.github" "${root}/travis-ci"
 git commit -q -m "add CI files"
 
+# Disable z15 and self-hosted runners
+sed -i -e '/z15/d' -e 's/, "self-hosted"//' "${root}/.github/workflows/test.yml"
+git add -f "${root}/.github/workflows/test.yml"
+git commit -q -m "disable self-hosted runners"
+
 # Push CI branch to GitHub
 if [[ $dryrun -eq 1 ]]; then
     echo "[dry-run] git push -q -f $repo -u HEAD"
