@@ -151,7 +151,7 @@ rm "${root}/master.zip"
 rsync -a --exclude README "${root}/vmtest-master/." "$root"
 rm -r "${root}/vmtest-master"
 
-git add -f "${root}/.github" "${root}/travis-ci"
+git add -f "${root}/.github" "${root}/ci"
 git commit -q -m "add CI files"
 
 # Push CI branch to GitHub
